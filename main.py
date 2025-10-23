@@ -1,10 +1,42 @@
 from logging import root
 import pandas
 
-csv_content = pandas.read_csv("parcours_explorateurs.csv")
-print(csv_content.head(100))
+explorator_df = pandas.read_csv("parcours_explorateurs.csv")
+print(explorator_df.head(100))
 
-adjacent_table = {}
-adjacent_table = {
-    row["noeud_amont"]: row["noeud_aval"] for _, row in csv_content.iterrows()
-}
+
+def prepare_data(explorator_df):
+    adjacent_table = {}
+    adjacent_table = {
+        row["noeud_amont"]: row["noeud_aval"] for _, row in explorator_df.iterrows()
+    }
+
+    starting_nodes = explorator_df[explorator_df["type_aretes"] == "depart"][
+        "noeud_amont"
+    ].values
+    ending_nodes = set(
+        explorator_df[explorator_df["type_aretes"] == "arrivee"]["noeud_aval"].values
+    )
+
+    return adjacent_table, starting_nodes, ending_nodes
+
+
+def find_explorators_paths(adjacent_table, starting_nodes, ending_nodes):
+    paths = []
+    for starting_nodes in starting_nodes:
+        current_path = [starting_nodes]
+        current_node = current_path[-1]
+        while current_node not in ending_nodes:
+            next_node = adjacent_table[current_node]
+            current_path.append(next_node)
+            current_node = current_path[-1]
+
+            print(current_path)
+            print("_-_" * 20)
+
+
+explorator_df = pandas.read_csv("./parcours_explorateurs.csv")
+adjacent_table, starting_nodes, ending_nodes = prepare_data(explorator_df)
+find_explorators_paths(
+    adjacent_table, starting_nodes, ending_nodes
+)  # Appeler la fonction
